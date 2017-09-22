@@ -280,7 +280,7 @@ class DynamoDbStorage implements Storage
           self::TABLE_KEY           => $this->prepareKey($storageName, $key),
         ]);
 
-        if (! $item) {
+        if (false === $item->hasKey(self::TABLE_ITEM_KEY)) {
             throw NotFoundException::notFoundByKey($key);
         }
 

@@ -309,12 +309,15 @@ class DynamoDbTest extends \PHPUnit_Framework_TestCase
 
     public function testTryingToFindAnItemThatDoesNotExist()
     {
+        $result = $this->getDynamoDbResultMock(['hasKey', 'get']);
+        $result->expects($this->once())->method('hasKey')->with('Item')->willReturn(false);
+
         $client = $this->getDynamoDbMock(['getItem']);
         $client->expects($this->once())->method('getItem')->with($this->equalTo([
             'TableName'      => 'MyTable',
             'ConsistentRead' => true,
             'Key'            => ['Id' => ['N' => '1000']],
-        ]))->willReturn(null);
+        ]))->willReturn($result);
 
         $storage = new DynamoDbStorage($client);
         $this->setExpectedException(
@@ -326,7 +329,8 @@ class DynamoDbTest extends \PHPUnit_Framework_TestCase
 
     public function testFindAnItemThatExists()
     {
-        $result = $this->getDynamoDbResultMock(['get']);
+        $result = $this->getDynamoDbResultMock(['hasKey', 'get']);
+        $result->expects($this->once())->method('hasKey')->with('Item')->willReturn(true);
         $result->expects($this->once())->method('get')->with('Item')->willReturn([
             'hello' => ['S' => 'world'],
         ]);
